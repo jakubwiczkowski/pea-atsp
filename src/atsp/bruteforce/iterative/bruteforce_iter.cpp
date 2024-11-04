@@ -14,6 +14,7 @@ solution bruteforce_iter::permute(graph& graph, std::vector<vertex_t> &vertices)
     best_solution.weight = std::numeric_limits<int>::max();
     int n = vertices.size();
     std::vector<int> indices(n);
+
     for (int i = 0; i < n; ++i) {
         indices[i] = i;
     }
@@ -31,6 +32,7 @@ solution bruteforce_iter::permute(graph& graph, std::vector<vertex_t> &vertices)
             best_solution.vertices = current_permutation;
         }
 
+        // sprawdzanie posortowania niemalejacego
         int i = n - 1;
         while (i > 0 && indices[i - 1] >= indices[i]) {
             --i;

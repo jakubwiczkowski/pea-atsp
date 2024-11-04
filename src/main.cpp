@@ -13,8 +13,7 @@ int main() {
     graph* main_graph = nullptr;
 
     main_menu.add_option(0, "Wczytanie danych z pliku", [&main_graph] {
-        if (main_graph != nullptr)
-            delete main_graph;
+        delete main_graph;
 
         std::cout << "[?] Podaj sciezke do pliku: ";
         std::string path;
@@ -36,6 +35,7 @@ int main() {
                 main_graph->set_edge(row, column, weight);
             }
         }
+        file.close();
     });
     main_menu.add_option(1, "Wygenerowanie danych losowych", [&main_graph] {
         vertex_t vertices;

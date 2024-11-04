@@ -1,43 +1,5 @@
-
-
-//#include "dynamic.h"
-//#include <algorithm>
-
-
-//solution dynamic::solve(graph &graph) {
-//    int answer = find_solution(graph, 1, 0);
-//    std::vector<vertex_t> path;
-//
-//    return {{}, answer};
-//}
-//
-//int dynamic::find_solution(graph &graph, int mask, vertex_t pos) {
-//    int VISITED_ALL = (1 << graph.get_vertices()) - 1;
-//
-//    if (mask == VISITED_ALL) return graph.get_weight(pos, 0);
-//
-//    int answer = std::numeric_limits<int>::max();
-//
-//    for (vertex_t target = 0; target < graph.get_vertices(); ++target) {
-//        if (target == pos) continue;
-//        if ((mask & (1 << target)) == 0) {
-//            int new_answer = graph.get_weight(pos, target) +
-//                    find_solution(graph, mask | (1 << target), target);
-//
-//            if (new_answer < answer) {
-//                answer = new_answer;
-//
-//            }
-//        }
-//    }
-//
-//    return answer;
-//}
-
 #include "dynamic.h"
-#include <algorithm>
 #include <vector>
-#include <unordered_map>
 
 solution dynamic::solve(graph &graph) {
     int n = graph.get_vertices();
