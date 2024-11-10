@@ -3,12 +3,11 @@
 #include <chrono>
 #include "menu/menu.h"
 #include "graph/graph.h"
-#include "atsp/bruteforce/recursive/bruteforce_rec.h"
 #include "atsp/bruteforce/iterative/bruteforce_iter.h"
 #include "atsp/dynamic/dynamic.h"
 
 int main() {
-    menu main_menu(6);
+    menu main_menu(7);
 
     graph* main_graph = nullptr;
 
@@ -88,6 +87,9 @@ int main() {
 
         solution dyn_sol = dyn.solve(*main_graph);
         print_solution(dyn_sol);
+    });
+    main_menu.add_option(6, "Wyjscie", [&main_menu] {
+        main_menu.close();
     });
 
     main_menu.open();
