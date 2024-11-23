@@ -5,11 +5,13 @@
 #include "graph/graph.h"
 #include "atsp/bruteforce/iterative/bruteforce_iter.h"
 #include "atsp/dynamic/dynamic.h"
+#include "atsp/bruteforce/optimized/bruteforce_iter_opt.h"
+#include "atsp/little/little.h"
 
 int main() {
-    menu main_menu(7);
+    menu main_menu(9);
 
-    graph* main_graph = nullptr;
+    graph *main_graph = nullptr;
 
     main_menu.add_option(0, "Wczytanie danych z pliku", [&main_graph] {
         delete main_graph;
@@ -56,14 +58,29 @@ int main() {
     main_menu.add_option(3, "Uruchom algorytm Bruteforce (iteracyjny)", [&main_graph] {
         if (main_graph == nullptr)
             return;
-        bruteforce_iter bf_iter;
+        bruteforce_iter_opt bf_iter;
         const auto start_time = std::chrono::high_resolution_clock::now();
         solution sol_2 = bf_iter.solve(*main_graph);
         const auto end_time = std::chrono::high_resolution_clock::now();
         print_solution(sol_2);
-        std::cout << "[#] Bruteforce (iteracyjny) - wykonano w " << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << "ns" << std::endl;
+        std::cout << "[#] Bruteforce (iteracyjny) - wykonano w "
+                  << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << "ns"
+                  << std::endl;
     });
-    main_menu.add_option(4, "Uruchom algorytm Dynamic Programming (Held-Karp)", [&main_graph] {
+    main_menu.add_option(4, "Uruchom algorytm B&B (Little)", [&main_graph] {
+        if (main_graph == nullptr)
+            return;
+        little lit;
+        const auto start_time = std::chrono::high_resolution_clock::now();
+        solution lit_2 = lit.solve(*main_graph);
+        const auto end_time = std::chrono::high_resolution_clock::now();
+        print_solution(lit_2);
+        std::cout << "[#] Branch and Bound (Little) - wykonano w "
+                  << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << "ns"
+                  << std::endl;
+
+    });
+    main_menu.add_option(5, "Uruchom algorytm Dynamic Programming (Held-Karp)", [&main_graph] {
         if (main_graph == nullptr)
             return;
         dynamic dyn;
@@ -71,24 +88,78 @@ int main() {
         solution dyn_2 = dyn.solve(*main_graph);
         const auto end_time = std::chrono::high_resolution_clock::now();
         print_solution(dyn_2);
-        std::cout << "[#] Dynamic Programming (Held-Karp) - wykonano w " << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << "ns" << std::endl;
+        std::cout << "[#] Dynamic Programming (Held-Karp) - wykonano w "
+                  << std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count() << "ns"
+                  << std::endl;
 
     });
-    main_menu.add_option(5, "Debug", [&main_graph] {
+    main_menu.add_option(6, "Obliczenia do sprawozdania", [] {
+        static bruteforce_iter_opt bf;
+        static dynamic dyn;
+
+        static uint16_t bruteforce_sizes[] = {7, 8, 9, 10, 11, 12, 13};
+        static uint16_t bnb_sizes[] = {};
+        static uint16_t dynamic_sizes[] = {16, 17, 18, 19, 20, 21, 22};
+
+        static int repeats = 100;
+
+        std::ofstream output_bf_file("results_bf.txt", std::ios_base::app);
+
+        std::cout << "[#] BRUTEFORCE" << std::endl;
+        for (uint16_t size : bruteforce_sizes) {
+            output_bf_file << size << ",";
+            std::cout << "    [#] Rozmiar: " << size << std::endl;
+            long total_ns = 0;
+            for (int i = 0; i < repeats; ++i) {
+                std::cout << "        [#] Progres: " << i + 1 << "/" << repeats << " (" << ((double) (i + 1) / repeats) * 100 << "%) - ";
+                graph to_solve = graph(graph::generate_random_full(size));
+                const auto start_time = std::chrono::high_resolution_clock::now();
+                solution dyn_2 = bf.solve(to_solve);
+                const auto end_time = std::chrono::high_resolution_clock::now();
+                auto amount = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+                std::cout << amount << "ns" << std::endl;
+                total_ns += amount;
+            }
+            output_bf_file << (total_ns / repeats) << "\n";
+        }
+
+        output_bf_file.close();
+
+        std::ofstream output_dp_file("results_dyn.txt", std::ios_base::app);
+
+        std::cout << "[#] DYNAMIC PROGRAMMING" << std::endl;
+        for (uint16_t size : dynamic_sizes) {
+            output_dp_file << size << ",";
+            std::cout << "    [#] Rozmiar: " << size << std::endl;
+            long total_ns = 0;
+            for (int i = 0; i < repeats; ++i) {
+                std::cout << "        [#] Progres: " << i + 1 << "/" << repeats << " (" << ((double) (i + 1) / repeats) * 100 << "%) - ";
+                graph to_solve = graph(graph::generate_random_full(size));
+                const auto start_time = std::chrono::high_resolution_clock::now();
+                solution dyn_2 = dyn.solve(to_solve);
+                const auto end_time = std::chrono::high_resolution_clock::now();
+                auto amount = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+                std::cout << amount << "ns" << std::endl;
+                total_ns += amount;
+            }
+            output_dp_file << (total_ns / repeats) << "\n";
+        }
+
+        output_dp_file.close();
+    });
+    main_menu.add_option(7, "Debug", [&main_graph] {
         if (main_graph == nullptr)
             return;
 
-        bruteforce_iter bf_iter;
+        bruteforce_iter_opt bf;
 
-        solution sol_2 = bf_iter.solve(*main_graph);
-        print_solution(sol_2);
-
-        dynamic dyn;
-
-        solution dyn_sol = dyn.solve(*main_graph);
-        print_solution(dyn_sol);
+        little lit;
+        solution xd = lit.solve(*main_graph);
+        print_solution(xd);
+        solution sol = bf.solve(*main_graph);
+        print_solution(sol);
     });
-    main_menu.add_option(6, "Wyjscie", [&main_menu] {
+    main_menu.add_option(8, "Wyjscie", [&main_menu] {
         main_menu.close();
     });
 

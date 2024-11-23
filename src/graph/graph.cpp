@@ -10,9 +10,15 @@ graph::graph(uint16_t vertices) {
     this->vertices = vertices;
 
     this->graph_matrix = new int*[vertices];
+    this->deleted_rows = new bool[this->vertices];
+    this->deleted_columns = new bool[this->vertices];
+
     for (int row = 0; row < vertices; ++row) {
         this->graph_matrix[row] = new int[vertices];
+        this->deleted_rows[row] = false;
+        this->deleted_columns[row] = false;
     }
+
 }
 
 graph::graph(const graph &to_copy) {
@@ -26,6 +32,14 @@ graph::graph(const graph &to_copy) {
             this->graph_matrix[row][column] = to_copy.get_weight(row, column);
         }
     }
+
+    this->deleted_rows = new bool [this->vertices];
+    this->deleted_columns = new bool [this->vertices];
+
+    for (vertex_t u = 0; u < this->vertices; u++) {
+        this->deleted_rows[u] = to_copy.is_row_deleted(u);
+        this->deleted_columns[u] = to_copy.is_column_deleted(u);
+    }
 }
 
 graph::~graph() {
@@ -33,6 +47,8 @@ graph::~graph() {
         delete[] this->graph_matrix[row];
     }
     delete[] this->graph_matrix;
+    delete[] this->deleted_rows;
+    delete[] this->deleted_columns;
 }
 
 void graph::set_edge(vertex_t u, vertex_t v, int weight) {
@@ -47,9 +63,34 @@ int graph::get_weight(vertex_t u, vertex_t v) const {
     return this->graph_matrix[u][v];
 }
 
+void graph::delete_row(vertex_t row) const {
+    this->deleted_rows[row] = true;
+}
+
+void graph::delete_column(vertex_t column) const {
+    this->deleted_columns[column] = true;
+}
+
+bool graph::is_row_deleted(vertex_t row) const {
+    return this->deleted_rows[row];
+}
+
+bool graph::is_column_deleted(vertex_t column) const{
+    return this->deleted_columns[column];
+}
+
 void graph::display() {
+    std::cout << "    ";
+    for (int col = 0; col < this->get_vertices(); ++col) {
+        if (is_column_deleted(col)) continue;
+        std::cout << std::setw(3) << col << " ";
+    }
+    std::cout << std::endl;
     for (int i = 0; i < this->get_vertices(); i++) {
+        if (this->is_row_deleted(i)) continue;
+        std::cout << std::setw(3) << i << " ";
         for (int j = 0; j < this->get_vertices(); j++) {
+            if (this->is_column_deleted(j)) continue;
             std::cout << std::setw(3) << this->graph_matrix[i][j] << " ";
         }
         std::cout << std::endl;
@@ -59,7 +100,7 @@ void graph::display() {
 std::vector<vertex_t> graph::get_adjacent(uint16_t vertex) {
     std::vector<vertex_t> adjacent;
     for (vertex_t possible_adjacent = 0; possible_adjacent < this->get_vertices(); ++possible_adjacent) {
-        if (this->get_weight(vertex, possible_adjacent) <= 0) continue;
+        if (this->get_weight(vertex, possible_adjacent) -1) continue;
         adjacent.push_back(possible_adjacent);
     }
     return adjacent;
@@ -94,4 +135,14 @@ graph graph::generate_random_full(uint16_t vertices) {
     }
 
     return generated;
+}
+
+int graph::degree() {
+    int value = this->vertices;
+
+    for (int i = 0; i < this->vertices; i++) {
+        if (this->is_column_deleted(i)) value--;
+    }
+
+    return value;
 }

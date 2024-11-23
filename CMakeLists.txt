@@ -18,6 +18,8 @@ add_executable(pea_atsp
         src/atsp/bruteforce/iterative/bruteforce_iter.cpp
         src/atsp/bruteforce/iterative/bruteforce_iter.h
         src/atsp/dynamic/dynamic.cpp
-        src/atsp/dynamic/dynamic.h)
+        src/atsp/dynamic/dynamic.h
+        src/atsp/bruteforce/optimized/bruteforce_iter_opt.cpp
+        src/atsp/bruteforce/optimized/bruteforce_iter_opt.h)
 
 target_compile_options(pea_atsp PRIVATE -O3)
