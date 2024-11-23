@@ -10,6 +10,7 @@ solution little::solve(graph &graph) {
     auto cycle = std::vector<edge_l>();
     solution best_solution;
     best_solution.weight = std::numeric_limits<int>::max();
+    min_sol = std::numeric_limits<int>::max();
 
     traverse_tree(graph, cycle, 0, best_solution, graph);
 
@@ -129,9 +130,9 @@ graph little::left_subtree(graph &reduced, edge_l edge, std::vector<edge_l>& cyc
     if (cycle.size() == 1)
         return new_graph;
 
-    std::vector<vertex_t> longest_path = path_from_edge_list(cycle);
-
-    new_graph.set_edge(longest_path[longest_path.size() - 1], longest_path[0], -1);
+    for (auto& path: all_paths_from_edge_list(cycle)) {
+        new_graph.set_edge(path[path.size() - 1], path[0], -1);
+    }
 
     return new_graph;
 }
@@ -219,7 +220,36 @@ std::vector<vertex_t> little::path_from_edge_list(std::vector<edge_l> &edges) {
             longest = longest_path.size();
         }
     }
+
     return longest_path;
+}
+
+std::vector<std::vector<vertex_t>>little::all_paths_from_edge_list(std::vector<edge_l> &edges) {
+    std::unordered_map<vertex_t, vertex_t> map;
+    std::set<vertex_t> cycle_vertices;
+    for (auto& [u, v]: edges) {
+        cycle_vertices.emplace(u);
+        cycle_vertices.emplace(v);
+        map[u] = v;
+    }
+
+    // skonstruowanie najdłuższej ścieżki z możliwych krawędzi
+    std::vector<std::vector<vertex_t>> paths;
+    for (auto& vertex: cycle_vertices) {
+        std::vector<vertex_t> current_path;
+        vertex_t current = vertex;
+        current_path.push_back(current);
+        while (map.find(current) != map.end()) {
+            current = map[current];
+            if (std::find(current_path.begin(), current_path.end(), current) != current_path.end())
+                break;
+            current_path.push_back(current);
+        }
+
+        if (current_path.size() > 2) paths.push_back(current_path);
+    }
+
+    return paths;
 }
 
 int little::calculate_cost(graph& graph, std::vector<vertex_t> &path) {

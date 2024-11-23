@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <chrono>
+#include <random>
 #include "menu/menu.h"
 #include "graph/graph.h"
 #include "atsp/bruteforce/iterative/bruteforce_iter.h"
@@ -148,16 +149,38 @@ int main() {
         output_dp_file.close();
     });
     main_menu.add_option(7, "Debug", [&main_graph] {
-        if (main_graph == nullptr)
-            return;
+//        if (main_graph == nullptr)
+//            return;
 
-        bruteforce_iter_opt bf;
+        static std::random_device r;
+        static std::default_random_engine e1(r());
+        static std::uniform_int_distribution<int> uniform_dist_weight(7, 16);
+
+        int repeats = 100000;
 
         little lit;
-        solution xd = lit.solve(*main_graph);
-        print_solution(xd);
-        solution sol = bf.solve(*main_graph);
-        print_solution(sol);
+        dynamic dyn;
+
+        for (int i = 0; i < repeats; i++) {
+            graph test_graph(graph::generate_random_full(uniform_dist_weight(e1)));
+
+            std::cout << "[#] TEST " << i + 1 << " z " << repeats << std::endl;
+            solution dyn_sol = dyn.solve(test_graph);
+            solution lit_sol = lit.solve(test_graph);
+
+            if (dyn_sol.weight == lit_sol.weight) {
+                std::cout << "    Pomyślny! " << dyn_sol.weight << " == " << lit_sol.weight << std::endl;
+            } else {
+                std::cout << "    Zły! " << dyn_sol.weight << " != " << lit_sol.weight << std::endl;
+                std::cout << "Graf: " << std::endl;
+                test_graph.display();
+                std::cout << "Rozwiązanie dyn:" << std::endl;
+                print_solution(dyn_sol);
+                std::cout << "Rozwiązanie lit:" << std::endl;
+                print_solution(lit_sol);
+                break;
+            }
+        }
     });
     main_menu.add_option(8, "Wyjscie", [&main_menu] {
         main_menu.close();

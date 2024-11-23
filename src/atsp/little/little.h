@@ -28,6 +28,7 @@ private:
     graph right_subtree(graph& reduced, vertex_t row, vertex_t column);
 
     std::vector<vertex_t> path_from_edge_list(std::vector<edge_l>& edges);
+    std::vector<std::vector<vertex_t>> all_paths_from_edge_list(std::vector<edge_l> &edges);
     int calculate_cost(graph& graph, std::vector<vertex_t>& path);
 };
 
