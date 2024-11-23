@@ -23,17 +23,13 @@ std::pair<graph, int> little::reduce(graph &to_reduce) {
     // Redukcja rzędów
     for (vertex_t row = 0; row < reduced.get_vertices(); ++row) {
         if (to_reduce.is_row_deleted(row)) continue;
-//        std::cout << "Rząd do redukcji: " << row << std::endl;
-
         int lowest = std::numeric_limits<int>::max();
 
         for (vertex_t col = 0; col < reduced.get_vertices(); ++col) {
             if (to_reduce.is_column_deleted(col)) continue;
             if (to_reduce.get_weight(row, col) == -1) continue;
-//            std::cout << "  Kolumna: " << col << std::endl;
 
             if (reduced.get_weight(row, col) < lowest) {
-//                std::cout << "    " << row << "," << col << " = " << reduced.get_weight(row, col) << " < " << lowest << std::endl;
                 lowest = reduced.get_weight(row, col);
             }
         }
@@ -53,19 +49,13 @@ std::pair<graph, int> little::reduce(graph &to_reduce) {
     // Redukcja kolumn
     for (vertex_t col = 0; col < reduced.get_vertices(); ++col) {
         if (to_reduce.is_column_deleted(col)) continue;
-
-//        std::cout << "Kolumna do redukcji: " << col << std::endl;
-
         int lowest = std::numeric_limits<int>::max();
 
         for (vertex_t row = 0; row < reduced.get_vertices(); ++row) {
             if (to_reduce.is_row_deleted(row)) continue;
             if (to_reduce.get_weight(row, col) == -1) continue;
 
-//            std::cout << "  Rząd: " << row << std::endl;
-
             if (reduced.get_weight(row, col) < lowest) {
-//                std::cout << "    " << row << "," << col << " = " << reduced.get_weight(row, col) << " < " << lowest << std::endl;
                 lowest = reduced.get_weight(row, col);
             }
         }
@@ -131,8 +121,6 @@ std::pair<std::pair<vertex_t, vertex_t>, int> little::division_pair(graph &reduc
 graph little::left_subtree(graph &reduced, edge_l edge, std::vector<edge_l>& cycle) {
     auto new_graph = graph(reduced);
 
-//    std::cout << " LEWE PODGRAF" << std::endl;
-
     new_graph.delete_row(edge.first);
     new_graph.delete_column(edge.second);
 
@@ -142,11 +130,6 @@ graph little::left_subtree(graph &reduced, edge_l edge, std::vector<edge_l>& cyc
         return new_graph;
 
     std::vector<vertex_t> longest_path = path_from_edge_list(cycle);
-
-//    for (auto& v: longest_path) {
-//        std::cout << v << " ";
-//    }
-//    std::cout << std::endl;
 
     new_graph.set_edge(longest_path[longest_path.size() - 1], longest_path[0], -1);
 
@@ -165,12 +148,7 @@ graph little::right_subtree(graph &reduced, vertex_t row, vertex_t column) {
 void little::traverse_tree(graph target, std::vector<edge_l> cycle,
                            int lower_bound, solution& best_solution,
                            graph& original_graph) {
-//    std::cout << "Przed redukcją: " << std::endl;
-//    target.display();
     auto [reduced_graph, reduced] = reduce(target);
-
-//    std::cout << "Po redukcji: " << std::endl;
-//    reduced_graph.display();
 
     if (lower_bound + reduced < min_sol) {
         if (reduced_graph.degree() == 2) {
@@ -182,14 +160,10 @@ void little::traverse_tree(graph target, std::vector<edge_l> cycle,
                     if (reduced_graph.is_column_deleted(v)) continue;
                     if (reduced_graph.get_weight(u, v) != 0) continue;
 
-//                    reduced_graph.display();
-
-//                    std::cout << u << " x " << v << std::endl;
                     cycle.emplace_back(u, v);
                 }
             }
 
-//            std::cout << "cykl!" << std::endl;
             std::vector<vertex_t> path = path_from_edge_list(cycle);
             path.push_back(path[0]);
             int cost = calculate_cost(original_graph, path);
@@ -199,13 +173,8 @@ void little::traverse_tree(graph target, std::vector<edge_l> cycle,
                 best_solution.vertices = path;
             }
 
-//            for (auto v : path) {
-//                std::cout << v << " ";
-//            }
-//            std::cout << std::endl;
         } else {
             auto [pair, max] = division_pair(reduced_graph);
-//            std::cout << "para do us: " << pair.first << " " << pair.second << std::endl;
             std::vector<edge_l> new_cycle(cycle);
             new_cycle.push_back(pair);
             traverse_tree(left_subtree(reduced_graph, pair, new_cycle),
@@ -232,7 +201,7 @@ std::vector<vertex_t> little::path_from_edge_list(std::vector<edge_l> &edges) {
         map[u] = v;
     }
 
-    // skonstruowanie najdłuższej ścieżki z możliwe
+    // skonstruowanie najdłuższej ścieżki z możliwych krawędzi
     size_t longest = 0;
     std::vector<vertex_t> longest_path;
     for (auto& vertex: cycle_vertices) {
