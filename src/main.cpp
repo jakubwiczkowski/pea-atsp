@@ -96,10 +96,11 @@ int main() {
     });
     main_menu.add_option(6, "Obliczenia do sprawozdania", [] {
         static bruteforce_iter_opt bf;
+        static little bnb;
         static dynamic dyn;
 
         static uint16_t bruteforce_sizes[] = {7, 8, 9, 10, 11, 12, 13};
-        static uint16_t bnb_sizes[] = {};
+        static uint16_t bnb_sizes[] = {10, 15, 20, 30, 40 ,50, 60};
         static uint16_t dynamic_sizes[] = {16, 17, 18, 19, 20, 21, 22};
 
         static int repeats = 100;
@@ -126,6 +127,28 @@ int main() {
 
         output_bf_file.close();
 
+        std::ofstream output_bnb_file("results_bnb.txt", std::ios_base::app);
+
+        std::cout << "[#] BRANCH AND BOUND" << std::endl;
+        for (uint16_t size : bnb_sizes) {
+            output_bnb_file << size << ",";
+            std::cout << "    [#] Rozmiar: " << size << std::endl;
+            long total_ns = 0;
+            for (int i = 0; i < repeats; ++i) {
+                std::cout << "        [#] Progres: " << i + 1 << "/" << repeats << " (" << ((double) (i + 1) / repeats) * 100 << "%) - ";
+                graph to_solve = graph(graph::generate_random_full(size));
+                const auto start_time = std::chrono::high_resolution_clock::now();
+                solution dyn_2 = bnb.solve(to_solve);
+                const auto end_time = std::chrono::high_resolution_clock::now();
+                auto amount = std::chrono::duration_cast<std::chrono::nanoseconds>(end_time - start_time).count();
+                std::cout << amount << "ns" << std::endl;
+                total_ns += amount;
+            }
+            output_bnb_file << (total_ns / repeats) << "\n";
+        }
+
+        output_bnb_file.close();
+
         std::ofstream output_dp_file("results_dyn.txt", std::ios_base::app);
 
         std::cout << "[#] DYNAMIC PROGRAMMING" << std::endl;
@@ -149,9 +172,6 @@ int main() {
         output_dp_file.close();
     });
     main_menu.add_option(7, "Debug", [&main_graph] {
-//        if (main_graph == nullptr)
-//            return;
-
         static std::random_device r;
         static std::default_random_engine e1(r());
         static std::uniform_int_distribution<int> uniform_dist_weight(7, 16);
