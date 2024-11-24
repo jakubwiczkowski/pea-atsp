@@ -97,15 +97,6 @@ void graph::display() {
     }
 }
 
-std::vector<vertex_t> graph::get_adjacent(uint16_t vertex) {
-    std::vector<vertex_t> adjacent;
-    for (vertex_t possible_adjacent = 0; possible_adjacent < this->get_vertices(); ++possible_adjacent) {
-        if (this->get_weight(vertex, possible_adjacent) -1) continue;
-        adjacent.push_back(possible_adjacent);
-    }
-    return adjacent;
-}
-
 std::vector<vertex_t> graph::generate_vertex_list() const {
     std::vector<vertex_t> vertices;
 

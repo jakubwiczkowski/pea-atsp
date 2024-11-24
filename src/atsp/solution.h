@@ -5,11 +5,26 @@
 #include <vector>
 #include <cstdint>
 
+/**
+ * Struktura reprezentująca rozwiązanie
+ * problemu Komiwojażera
+ */
 struct solution {
+    /**
+     * Cykl Hamiltona
+     */
     std::vector<vertex_t> vertices;
+    /**
+     * Koszt cyklu
+     */
     int weight;
 };
 
+/**
+ * Wyświetla podane rozwiązanie problemu Komiwojażera
+ *
+ * @param solution rozwiązanie
+ */
 static void print_solution(solution& solution) {
     std::cout << "[>] Minimalny cykl Hamiltona: " << solution.weight << std::endl;
     std::cout << "[>] Scieżka: ";
